@@ -161,7 +161,7 @@ const MainContent: React.FC = () => {
           >
             <h2 className="text-lg md:text-3xl lg:text-4xl font-light tracking-[0.2em] uppercase text-white/60">
               IF YOU DREAM OF BETTER ALGORITHMS                                                                                                                                                                                 
-                          -—-
+                          —-
             </h2>
             
             <h2 className="text-2xl md:text-5xl lg:text-6xl font-normal tracking-[0.4em] uppercase text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">
