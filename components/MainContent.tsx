@@ -160,7 +160,7 @@ const MainContent: React.FC = () => {
             className="space-y-12 md:space-y-16"
           >
             <h2 className="text-lg md:text-3xl lg:text-4xl font-light tracking-[0.2em] uppercase text-white/60">
-              IF YOU DREAM OF BETTER ALGORITHMS
+              IF YOU DREAM OF BETTER ALGORITHMS                                                                                                                                                                                 
                           -—-
             </h2>
             
