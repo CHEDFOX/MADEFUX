@@ -123,14 +123,14 @@ const MainContent: React.FC = () => {
         </h2>
       </motion.header>
 
-      {/* Viewport 1: Coding Greatness */}
+      {/* Viewport 1: MAKING MAGIC WITH */}
       <section className="h-screen w-full flex flex-col items-center justify-center px-4 snap-start">
         <motion.div 
           style={{ x: textTranslateX, y: textTranslateY }}
           className="text-center w-full max-w-[100vw] overflow-hidden cursor-default"
         >
           <AnimatedText 
-            text="CODING GREATNESS" 
+            text="MAKING MAGIC WITH" 
             className="text-xl sm:text-2xl md:text-5xl lg:text-7xl font-light tracking-[0.3em] uppercase leading-tight"
           />
           <motion.div
@@ -140,7 +140,7 @@ const MainContent: React.FC = () => {
             className="h-[1px] w-16 md:w-24 bg-white mx-auto my-6 md:my-8 origin-center shadow-[0_0_15px_rgba(255,255,255,0.5)]"
           />
           <AnimatedText 
-            text="BUILDING MAGIC" 
+            text="0 & 1" 
             className="text-xl sm:text-2xl md:text-5xl lg:text-7xl font-light tracking-[0.3em] uppercase leading-tight"
           />
         </motion.div>
@@ -160,11 +160,12 @@ const MainContent: React.FC = () => {
             className="space-y-12 md:space-y-16"
           >
             <h2 className="text-lg md:text-3xl lg:text-4xl font-light tracking-[0.2em] uppercase text-white/60">
-              If you dream of better algorithms —
+              IF YOU DREAM OF BETTER ALGORITHMS
+                          -—-
             </h2>
             
             <h2 className="text-2xl md:text-5xl lg:text-6xl font-normal tracking-[0.4em] uppercase text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">
-              You are one of us
+              YOU ARE ONE OF US
             </h2>
           </motion.div>
           
