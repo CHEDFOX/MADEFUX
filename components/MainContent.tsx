@@ -32,11 +32,11 @@ const MainContent: React.FC<Props> = ({ setGlobalState }) => {
     return () => clearInterval(interval);
   }, []);
 
-  // AMPERSAND (very slow, calm)
+  // AMPERSAND (slow + binary)
   useEffect(() => {
     const interval = setInterval(() => {
       setAndValue(v => (v === "&" ? "00100110" : "&"));
-    }, 4200); // low frequency
+    }, 4200);
     return () => clearInterval(interval);
   }, []);
 
@@ -51,6 +51,7 @@ const MainContent: React.FC<Props> = ({ setGlobalState }) => {
         }, 900);
       }
     };
+
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, [setGlobalState]);
@@ -63,27 +64,45 @@ const MainContent: React.FC<Props> = ({ setGlobalState }) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 2 }}
-        className="fixed top-12 left-0 w-full flex justify-center z-20 pointer-events-none"
+        className="fixed top-10 left-0 w-full flex justify-center z-20 pointer-events-none"
       >
-        <h2 className="text-xl md:text-2xl font-light tracking-[0.8em] uppercase shimmer">
+        <h2 className="text-base md:text-2xl font-light tracking-[0.6em] md:tracking-[0.8em] uppercase shimmer">
           MADEFOX
         </h2>
       </motion.header>
 
       {/* HERO */}
-      <section className="h-screen snap-start flex flex-col items-center justify-center text-center px-6">
+      <section className="h-screen snap-start flex flex-col items-center justify-center text-center px-4">
         <motion.div
           initial={{ opacity: 0, y: 40, filter: "blur(10px)" }}
           animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-          className="space-y-12"
+          className="space-y-10"
         >
-          <h1 className="uppercase font-light tracking-[0.35em] text-[clamp(2.2rem,7vw,5rem)]">
-            BUILDING MAGIC WIT
+          {/* LINE 1 */}
+          <h1
+            className="
+              uppercase font-light
+              tracking-[0.28em] md:tracking-[0.35em]
+              text-[clamp(1.8rem,7vw,5rem)]
+              whitespace-nowrap
+            "
+          >
+            BUILDING MAGIC
           </h1>
 
-          {/* BLINKING LINE */}
-          <div className="flex items-center justify-center gap-12 text-[clamp(2.4rem,8vw,5.5rem)] font-light tracking-[0.4em]">
+          {/* LINE 2 — LOCKED ROW */}
+          <div
+            className="
+              flex items-center justify-center
+              gap-6 md:gap-12
+              font-light
+              tracking-[0.3em] md:tracking-[0.4em]
+              text-[clamp(2rem,8vw,5.5rem)]
+              whitespace-nowrap
+            "
+          >
+            {/* LEFT */}
             <motion.span
               key={leftValue}
               initial={{ opacity: 0 }}
@@ -93,17 +112,24 @@ const MainContent: React.FC<Props> = ({ setGlobalState }) => {
               {leftValue}
             </motion.span>
 
-            {/* AMPERSAND → BINARY */}
+            {/* CENTER (FIXED WIDTH) */}
             <motion.span
               key={andValue}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6 }}
-              className="text-white/70 tracking-[0.25em]"
+              className="
+                inline-block
+                w-[6ch] md:w-[8ch]
+                text-center
+                text-white/70
+                tracking-[0.2em]
+              "
             >
               {andValue}
             </motion.span>
 
+            {/* RIGHT */}
             <motion.span
               key={rightValue}
               initial={{ opacity: 0 }}
@@ -117,23 +143,37 @@ const MainContent: React.FC<Props> = ({ setGlobalState }) => {
       </section>
 
       {/* BELIEF */}
-      <section className="h-screen snap-start flex flex-col items-center justify-center text-center px-6 relative">
+      <section className="h-screen snap-start flex flex-col items-center justify-center text-center px-4 relative">
         <motion.div
           initial={{ opacity: 0, y: 30, filter: "blur(6px)" }}
           whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           transition={{ duration: 1.2 }}
           viewport={{ once: true }}
-          className="space-y-10"
+          className="space-y-8"
         >
-          <p className="uppercase tracking-[0.3em] opacity-60 text-[clamp(1rem,3vw,1.4rem)]">
+          <p
+            className="
+              uppercase font-light opacity-60
+              tracking-[0.25em] md:tracking-[0.3em]
+              text-[clamp(0.9rem,3vw,1.4rem)]
+              whitespace-nowrap
+            "
+          >
             IF YOU DREAM OF BETTER ALGORITHMS -
           </p>
 
-          <h2 className="uppercase tracking-[0.4em] font-light text-[clamp(1.8rem,6vw,3.5rem)]">
+          <h2
+            className="
+              uppercase font-light
+              tracking-[0.35em] md:tracking-[0.4em]
+              text-[clamp(1.6rem,6vw,3.5rem)]
+              whitespace-nowrap
+            "
+          >
             YOU ARE ONE OF US
           </h2>
 
-          <div className="pt-16">
+          <div className="pt-12">
             <button onClick={() => setShowForm(true)}>
               <svg
                 width="90"
@@ -148,10 +188,8 @@ const MainContent: React.FC<Props> = ({ setGlobalState }) => {
         </motion.div>
 
         {/* FOOTER */}
-        <footer className="absolute bottom-10 text-[10px] tracking-[0.4em] uppercase opacity-50">
-          <a href="mailto:hello@madefox.com">
-            HELLO@MADEFOX.COM
-          </a>
+        <footer className="absolute bottom-8 text-[10px] tracking-[0.35em] uppercase opacity-50">
+          <a href="mailto:hello@madefox.com">HELLO@MADEFOX.COM</a>
         </footer>
       </section>
 
