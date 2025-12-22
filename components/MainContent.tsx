@@ -7,35 +7,33 @@ interface Props {
   setGlobalState?: (s: PageState) => void;
 }
 
-/* ===== UTIL ===== */
+/* ---------- UTIL ---------- */
 const charToBinary = (c: string) =>
   c.charCodeAt(0).toString(2).padStart(8, "0");
 
 const wordToBinary = (word: string) =>
   word.split("").map(charToBinary).join(" ");
 
-/* ===== HEADER (LETTER GLITCH, NO LAYOUT SHIFT) ===== */
+/* ---------- HEADER ---------- */
 const GlitchHeader: React.FC = () => {
   const text = "MADEFOX";
   const [index, setIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    const i = setInterval(() => {
-      const rand = Math.floor(Math.random() * text.length);
-      setIndex(rand);
-      setTimeout(() => setIndex(null), 600);
+    const interval = setInterval(() => {
+      const i = Math.floor(Math.random() * text.length);
+      setIndex(i);
+      setTimeout(() => setIndex(null), 700);
     }, 3000);
-    return () => clearInterval(i);
-  }, [text.length]);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <div className="relative flex shimmer tracking-[0.6em] md:tracking-[0.8em] text-[clamp(0.9rem,3vw,1.6rem)] leading-none">
+    <div className="flex shimmer tracking-[0.5em] md:tracking-[0.8em] text-[clamp(0.9rem,3vw,1.6rem)] leading-none">
       {text.split("").map((char, i) => (
-        <span key={i} className="relative w-[1ch] text-center">
-          {/* original letter */}
+        <span key={i} className="relative inline-block w-[1ch] text-center">
           <span className="opacity-100">{char}</span>
 
-          {/* binary overlay */}
           {index === i && (
             <motion.span
               initial={{ opacity: 0 }}
@@ -43,10 +41,11 @@ const GlitchHeader: React.FC = () => {
               transition={{ duration: 0.6 }}
               className="
                 absolute inset-0
+                flex items-center justify-center
                 text-white/60
-                text-[0.6em]
-                tracking-[0.1em]
-                scale-[0.85]
+                text-[0.55em]
+                tracking-[0.08em]
+                pointer-events-none
               "
             >
               {charToBinary(char)}
@@ -58,7 +57,7 @@ const GlitchHeader: React.FC = () => {
   );
 };
 
-/* ===== WORD GLITCH LINE (NO HEIGHT CHANGE) ===== */
+/* ---------- WORD GLITCH ---------- */
 const GlitchLine: React.FC<{
   text: string;
   fontSize: string;
@@ -68,43 +67,35 @@ const GlitchLine: React.FC<{
   const [index, setIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    const i = setInterval(() => {
+    const interval = setInterval(() => {
       setIndex(Math.floor(Math.random() * words.length));
-      setTimeout(() => setIndex(null), 700);
+      setTimeout(() => setIndex(null), 800);
     }, 3000);
-    return () => clearInterval(i);
+    return () => clearInterval(interval);
   }, [words.length]);
 
   return (
     <div
       className={`flex justify-center flex-wrap ${fontSize} ${tracking}`}
-      style={{ lineHeight: "1.1" }} // LOCKED
+      style={{ lineHeight: "1.15" }}
     >
       {words.map((word, i) => (
         <span
           key={i}
-          className="relative mx-[0.35em] inline-flex items-center"
-          style={{ height: "1em" }} // RESERVE SPACE
+          className="relative mx-[0.35em] inline-flex items-center justify-center"
+          style={{ height: "1em" }}
         >
-          {/* original word */}
-          <span className="opacity-100">{word}</span>
-
-          {/* binary overlay */}
-          {index === i && (
+          {index === i ? (
             <motion.span
               initial={{ opacity: 0 }}
-              animate={{ opacity: [0, 1, 0.4] }}
+              animate={{ opacity: [0, 1, 0.6] }}
               transition={{ duration: 0.6 }}
-              className="
-                absolute inset-0
-                flex items-center justify-center
-                text-white/60
-                tracking-[0.1em]
-                scale-[0.75]
-              "
+              className="text-white/60 text-[0.7em] tracking-[0.08em]"
             >
               {wordToBinary(word)}
             </motion.span>
+          ) : (
+            <span className="opacity-100">{word}</span>
           )}
         </span>
       ))}
@@ -112,12 +103,11 @@ const GlitchLine: React.FC<{
   );
 };
 
-/* ===== MAIN ===== */
+/* ---------- MAIN ---------- */
 const MainContent: React.FC<Props> = ({ setGlobalState }) => {
   const [showForm, setShowForm] = useState(false);
   const hasScrolled = useRef(false);
 
-  // blinking numbers
   const [l, setL] = useState<"0" | "1">("0");
   const [r, setR] = useState<"0" | "1">("1");
 
@@ -130,7 +120,6 @@ const MainContent: React.FC<Props> = ({ setGlobalState }) => {
     };
   }, []);
 
-  // first scroll → mini fall
   useEffect(() => {
     const onScroll = () => {
       if (!hasScrolled.current && window.scrollY > 30) {
@@ -160,15 +149,12 @@ const MainContent: React.FC<Props> = ({ setGlobalState }) => {
             tracking="tracking-[0.25em] md:tracking-[0.35em]"
           />
 
-          {/* 0 & 1 — NO OVERLAP */}
+          {/* 0 & 1 (FIXED) */}
           <div className="flex items-center justify-center gap-6 md:gap-12 text-[clamp(1.5rem,7vw,4.8rem)] tracking-[0.35em] leading-none">
             <motion.span animate={{ opacity: [0, 1] }}>{l}</motion.span>
 
-            {/* fixed width ampersand */}
-            <span className="inline-flex items-center justify-center w-[7ch]">
-              <span className="text-[0.6em] tracking-[0.12em] text-white/60">
-                00100110
-              </span>
+            <span className="inline-flex items-center justify-center w-[7ch] text-[0.6em] tracking-[0.12em] text-white/60">
+              00100110
             </span>
 
             <motion.span animate={{ opacity: [0, 1] }}>{r}</motion.span>
