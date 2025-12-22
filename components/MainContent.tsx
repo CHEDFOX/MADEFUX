@@ -9,14 +9,34 @@ interface Props {
 
 const MainContent: React.FC<Props> = ({ setGlobalState }) => {
   const [showForm, setShowForm] = useState(false);
-  const [swap, setSwap] = useState(false);
   const hasScrolledRef = useRef(false);
 
-  // TRUE SWAP LOOP
+  // blinking values
+  const [leftValue, setLeftValue] = useState<"0" | "1">("0");
+  const [rightValue, setRightValue] = useState<"0" | "1">("1");
+  const [andValue, setAndValue] = useState<"&" | "00100110">("&");
+
+  // LEFT number (slower)
   useEffect(() => {
     const interval = setInterval(() => {
-      setSwap((prev) => !prev);
-    }, 1800); // calm, readable swap
+      setLeftValue(v => (v === "0" ? "1" : "0"));
+    }, 1800);
+    return () => clearInterval(interval);
+  }, []);
+
+  // RIGHT number (faster)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRightValue(v => (v === "0" ? "1" : "0"));
+    }, 1100);
+    return () => clearInterval(interval);
+  }, []);
+
+  // AMPERSAND (very slow, calm)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setAndValue(v => (v === "&" ? "00100110" : "&"));
+    }, 4200); // low frequency
     return () => clearInterval(interval);
   }, []);
 
@@ -31,7 +51,6 @@ const MainContent: React.FC<Props> = ({ setGlobalState }) => {
         }, 900);
       }
     };
-
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, [setGlobalState]);
@@ -59,44 +78,39 @@ const MainContent: React.FC<Props> = ({ setGlobalState }) => {
           transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
           className="space-y-12"
         >
-          {/* LINE 1 */}
           <h1 className="uppercase font-light tracking-[0.35em] text-[clamp(2.2rem,7vw,5rem)]">
-            BUILDING MAGIC WITH
+            BUILDING MAGIC WIT
           </h1>
 
-          {/* LINE 2 — TRUE SWAP */}
-          <div className="relative flex items-center justify-center text-[clamp(2.4rem,8vw,5.5rem)] font-light tracking-[0.4em]">
-            {/* LEFT SLOT */}
+          {/* BLINKING LINE */}
+          <div className="flex items-center justify-center gap-12 text-[clamp(2.4rem,8vw,5.5rem)] font-light tracking-[0.4em]">
             <motion.span
-              animate={{
-                x: swap ? 120 : 0,
-                opacity: [1, 0.3, 1],
-              }}
-              transition={{
-                x: { duration: 1, ease: "easeInOut" },
-                opacity: { duration: 1.5, repeat: Infinity },
-              }}
-              className="absolute left-1/2 -translate-x-[180%]"
+              key={leftValue}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4 }}
             >
-              0
+              {leftValue}
             </motion.span>
 
-            {/* CENTER */}
-            <span className="mx-12 select-none">&</span>
-
-            {/* RIGHT SLOT */}
+            {/* AMPERSAND → BINARY */}
             <motion.span
-              animate={{
-                x: swap ? -120 : 0,
-                opacity: [1, 0.3, 1],
-              }}
-              transition={{
-                x: { duration: 1, ease: "easeInOut" },
-                opacity: { duration: 1.5, repeat: Infinity },
-              }}
-              className="absolute left-1/2 translate-x-[80%]"
+              key={andValue}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6 }}
+              className="text-white/70 tracking-[0.25em]"
             >
-              1
+              {andValue}
+            </motion.span>
+
+            <motion.span
+              key={rightValue}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              {rightValue}
             </motion.span>
           </div>
         </motion.div>
@@ -143,7 +157,7 @@ const MainContent: React.FC<Props> = ({ setGlobalState }) => {
 
       {/* CONTACT */}
       <AnimatePresence>
-        {showForm && <ContactForm onClose={() => setShowForm(false)} />}  
+        {showForm && <ContactForm onClose={() => setShowForm(false)} />}
       </AnimatePresence>
     </div>
   );
