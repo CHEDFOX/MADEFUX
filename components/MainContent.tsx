@@ -9,7 +9,16 @@ interface Props {
 
 const MainContent: React.FC<Props> = ({ setGlobalState }) => {
   const [showForm, setShowForm] = useState(false);
+  const [swap, setSwap] = useState(false);
   const hasScrolledRef = useRef(false);
+
+  // TRUE SWAP LOOP
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSwap((prev) => !prev);
+    }, 1800); // calm, readable swap
+    return () => clearInterval(interval);
+  }, []);
 
   // FIRST SCROLL → MINI FALL
   useEffect(() => {
@@ -55,33 +64,40 @@ const MainContent: React.FC<Props> = ({ setGlobalState }) => {
             BUILDING MAGIC WITH
           </h1>
 
-          {/* LINE 2 — TRUE SWAP + BLINK */}
-          <div className="relative flex justify-center">
-            <motion.div
-              className="flex items-center gap-10 text-[clamp(2.4rem,8vw,5.5rem)] font-light tracking-[0.4em]"
-              animate={{ rotate: [0, 180, 360] }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                ease: "easeInOut",
+          {/* LINE 2 — TRUE SWAP */}
+          <div className="relative flex items-center justify-center text-[clamp(2.4rem,8vw,5.5rem)] font-light tracking-[0.4em]">
+            {/* LEFT SLOT */}
+            <motion.span
+              animate={{
+                x: swap ? 120 : 0,
+                opacity: [1, 0.3, 1],
               }}
+              transition={{
+                x: { duration: 1, ease: "easeInOut" },
+                opacity: { duration: 1.5, repeat: Infinity },
+              }}
+              className="absolute left-1/2 -translate-x-[180%]"
             >
-              <motion.span
-                animate={{ opacity: [1, 0.3, 1] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-              >
-                0
-              </motion.span>
+              0
+            </motion.span>
 
-              <span>&</span>
+            {/* CENTER */}
+            <span className="mx-12 select-none">&</span>
 
-              <motion.span
-                animate={{ opacity: [1, 0.3, 1] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-              >
-                1
-              </motion.span>
-            </motion.div>
+            {/* RIGHT SLOT */}
+            <motion.span
+              animate={{
+                x: swap ? -120 : 0,
+                opacity: [1, 0.3, 1],
+              }}
+              transition={{
+                x: { duration: 1, ease: "easeInOut" },
+                opacity: { duration: 1.5, repeat: Infinity },
+              }}
+              className="absolute left-1/2 translate-x-[80%]"
+            >
+              1
+            </motion.span>
           </div>
         </motion.div>
       </section>
@@ -125,9 +141,9 @@ const MainContent: React.FC<Props> = ({ setGlobalState }) => {
         </footer>
       </section>
 
-      {/* CONTACT FORM */}
+      {/* CONTACT */}
       <AnimatePresence>
-        {showForm && <ContactForm onClose={() => setShowForm(false)} />}
+        {showForm && <ContactForm onClose={() => setShowForm(false)} />}  
       </AnimatePresence>
     </div>
   );
