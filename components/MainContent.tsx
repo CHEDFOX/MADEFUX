@@ -88,7 +88,7 @@ const MainContent: React.FC<Props> = ({ setGlobalState }) => {
               whitespace-nowrap
             "
           >
-            BUILDING MAGIC
+            BUILDING MAGIC WIT
           </h1>
 
           {/* LINE 2 — LOCKED ROW */}
