@@ -1,41 +1,49 @@
-
-import React, { useState } from 'react';
-import { AnimatePresence } from 'framer-motion';
-import Threshold from './components/Threshold';
-import BlackHoleEffect from './components/BlackHoleEffect';
-import MainContent from './components/MainContent';
+import React, { useState } from "react";
+import { AnimatePresence } from "framer-motion";
+import Threshold from "./components/Threshold";
+import BlackHoleEffect from "./components/BlackHoleEffect";
+import MainContent from "./components/MainContent";
 
 export enum PageState {
-  THRESHOLD = 'THRESHOLD',
-  TRANSITION = 'TRANSITION',
-  CONTENT = 'CONTENT'
+  THRESHOLD = "THRESHOLD",
+  TRANSITION = "TRANSITION",
+  CONTENT = "CONTENT",
+  SCROLL_FALL = "SCROLL_FALL",
 }
 
 const App: React.FC = () => {
   const [state, setState] = useState<PageState>(PageState.THRESHOLD);
 
-  const startTransition = () => {
+  // Triggered when center button is pressed
+  const startInitialTransition = () => {
     setState(PageState.TRANSITION);
-    // Transition timing to coincide with the "Black Hole" animation burst
+
+    // Sync with black hole burst
     setTimeout(() => {
       setState(PageState.CONTENT);
-    }, 2800); // Slightly faster reveal for a punchier transition
+    }, 2800);
   };
 
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden select-none">
-      {/* Background canvas is always active for seamless transition */}
+      
+      {/* BACKGROUND — ALWAYS RUNNING */}
       <BlackHoleEffect state={state} />
 
+      {/* THRESHOLD ENTRY */}
       <AnimatePresence mode="wait">
         {state === PageState.THRESHOLD && (
-          <Threshold key="threshold" onEnter={startTransition} />
+          <Threshold key="threshold" onEnter={startInitialTransition} />
         )}
       </AnimatePresence>
 
+      {/* MAIN CONTENT */}
       <AnimatePresence>
-        {state === PageState.CONTENT && (
-          <MainContent key="content" />
+        {(state === PageState.CONTENT || state === PageState.SCROLL_FALL) && (
+          <MainContent
+            key="content"
+            setGlobalState={setState}
+          />
         )}
       </AnimatePresence>
     </div>
