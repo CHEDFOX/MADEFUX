@@ -1,112 +1,95 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ContactForm from "./ContactForm";
+import { PageState } from "../App";
 
-const heroText = {
-  hidden: { opacity: 0, y: 30, filter: "blur(10px)" },
-  visible: {
-    opacity: 1,
-    y: 0,
-    filter: "blur(0px)",
-    transition: { duration: 1, ease: [0.22, 1, 0.36, 1] },
-  },
-};
+interface Props {
+  setGlobalState?: (s: PageState) => void;
+}
 
-const float = {
-  animate: {
-    y: [0, -6, 0],
-    transition: {
-      duration: 6,
-      repeat: Infinity,
-      ease: "easeInOut",
-    },
-  },
-};
-
-const MainContent: React.FC = () => {
+const MainContent: React.FC<Props> = ({ setGlobalState }) => {
   const [showForm, setShowForm] = useState(false);
+  const hasFallenRef = useRef(false);
+
+  // FIRST SCROLL → trigger short fall
+  useEffect(() => {
+    const onScroll = () => {
+      if (!hasFallenRef.current && window.scrollY > 40) {
+        hasFallenRef.current = true;
+
+        setGlobalState?.(PageState.SCROLL_FALL);
+
+        setTimeout(() => {
+          setGlobalState?.(PageState.CONTENT);
+        }, 900); // short, subtle fall
+      }
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [setGlobalState]);
 
   return (
-    <div className="relative z-10 h-screen w-full overflow-y-scroll snap-y snap-mandatory bg-black text-white">
-      {/* HEADER */}
+    <div className="relative z-10 w-full h-screen overflow-y-scroll snap-y snap-mandatory scroll-smooth text-white">
+
+      {/* HEADER – MADEFOX (KEEP SHIMMER) */}
       <motion.header
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 2 }}
-        className="fixed top-10 left-0 w-full text-center z-20 pointer-events-none"
+        className="fixed top-12 left-0 w-full flex justify-center z-20 pointer-events-none"
       >
-        <h1 className="text-sm md:text-base tracking-[0.6em] font-light uppercase opacity-80">
+        <h2 className="text-xl md:text-2xl font-light tracking-[0.8em] uppercase shimmer">
           MADEFOX
-        </h1>
+        </h2>
       </motion.header>
 
-      {/* SECTION 1 – HERO */}
+      {/* HERO */}
       <section className="h-screen snap-start flex flex-col items-center justify-center px-6 text-center">
         <motion.div
-          variants={float}
-          animate="animate"
+          initial={{ opacity: 0, y: 40, filter: "blur(10px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
           className="space-y-6"
         >
-          <motion.h2
-            variants={heroText}
-            initial="hidden"
-            animate="visible"
-            className="font-light uppercase tracking-[0.25em]
-            text-[clamp(2.4rem,8vw,5.5rem)] leading-tight"
-          >
+          <h1 className="font-light uppercase tracking-[0.3em] text-[clamp(2.4rem,8vw,5.5rem)]">
             BUILDING MAGIC
-          </motion.h2>
+          </h1>
 
-          <motion.h3
-            variants={heroText}
-            initial="hidden"
-            animate="visible"
-            transition={{ delay: 0.15 }}
-            className="font-light uppercase tracking-[0.35em] opacity-80
-            text-[clamp(1.4rem,5vw,3rem)]"
-          >
+          <h2 className="font-light uppercase tracking-[0.35em] opacity-80 text-[clamp(1.4rem,5vw,3rem)]">
             WITH 0 AND 1
-          </motion.h3>
+          </h2>
         </motion.div>
       </section>
 
-      {/* SECTION 2 – BELIEF */}
-      <section className="h-screen snap-start flex flex-col items-center justify-center px-6 text-center">
-        <motion.div className="space-y-10 max-w-4xl">
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 0.6, y: 0 }}
-            transition={{ duration: 1 }}
-            viewport={{ once: true }}
-            className="uppercase tracking-[0.3em] font-light
-            text-[clamp(0.9rem,3vw,1.4rem)]"
-          >
+      {/* BELIEF */}
+      <section className="h-screen snap-start flex flex-col items-center justify-center px-6 text-center relative">
+        <motion.div
+          initial={{ opacity: 0, y: 30, filter: "blur(6px)" }}
+          whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          transition={{ duration: 1.2 }}
+          viewport={{ once: true }}
+          className="space-y-12 max-w-4xl"
+        >
+          <p className="uppercase tracking-[0.3em] font-light opacity-60 text-[clamp(0.9rem,3vw,1.4rem)]">
             IF YOU DREAM OF BETTER ALGORITHMS —
-          </motion.p>
+          </p>
 
-          <motion.h2
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-            viewport={{ once: true }}
-            className="uppercase tracking-[0.35em] font-light
-            text-[clamp(1.6rem,6vw,3.5rem)]"
-          >
+          <h2 className="uppercase tracking-[0.4em] font-light text-[clamp(1.6rem,6vw,3.5rem)]">
             YOU ARE ONE OF US
-          </motion.h2>
+          </h2>
 
-          {/* TRIANGLE BUTTON */}
-          <div className="pt-12">
+          {/* TRIANGLE */}
+          <div className="pt-12 flex flex-col items-center">
             <button
               onClick={() => setShowForm(true)}
-              className="group mx-auto flex items-center justify-center"
+              className="group"
             >
               <svg
                 width="90"
                 height="90"
                 viewBox="0 0 100 100"
-                className="stroke-white fill-transparent stroke-[0.6px]
-                transition-all group-hover:fill-white/10"
+                className="triangle-pulse stroke-white fill-transparent stroke-[0.6px] transition-all group-hover:fill-white/10"
               >
                 <path d="M50 15 L85 85 L15 85 Z" />
               </svg>
@@ -119,7 +102,7 @@ const MainContent: React.FC = () => {
         </motion.div>
 
         {/* FOOTER */}
-        <footer className="absolute bottom-10 text-[10px] tracking-[0.4em] uppercase opacity-50">
+        <footer className="absolute bottom-10 w-full flex justify-center text-[10px] tracking-[0.4em] uppercase opacity-50">
           <a
             href="mailto:hello@madefox.com"
             className="hover:opacity-100 transition"
@@ -129,7 +112,7 @@ const MainContent: React.FC = () => {
         </footer>
       </section>
 
-      {/* CONTACT FORM */}
+      {/* CONTACT */}
       <AnimatePresence>
         {showForm && <ContactForm onClose={() => setShowForm(false)} />}
       </AnimatePresence>
