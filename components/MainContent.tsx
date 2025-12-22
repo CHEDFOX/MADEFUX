@@ -7,31 +7,56 @@ interface Props {
   setGlobalState?: (s: PageState) => void;
 }
 
-// text → binary (ASCII, safe spacing)
-const toBinary = (text: string) =>
-  text
+/* Convert a single word to binary */
+const wordToBinary = (word: string) =>
+  word
     .split("")
-    .map((c) =>
-      c === " "
-        ? " "
-        : c.charCodeAt(0).toString(2).padStart(8, "0")
-    )
+    .map((c) => c.charCodeAt(0).toString(2).padStart(8, "0"))
     .join(" ");
+
+const AnimatedLine: React.FC<{
+  text: string;
+  fontSize: string;
+  tracking: string;
+  binaryInterval: number;
+}> = ({ text, fontSize, tracking, binaryInterval }) => {
+  const words = text.split(" ");
+  const [binaryIndex, setBinaryIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setBinaryIndex(Math.floor(Math.random() * words.length));
+      setTimeout(() => setBinaryIndex(null), 1800);
+    }, binaryInterval);
+
+    return () => clearInterval(interval);
+  }, [words.length, binaryInterval]);
+
+  return (
+    <div className={`flex flex-wrap justify-center ${tracking} ${fontSize}`}>
+      {words.map((word, i) => (
+        <span key={i} className="mx-[0.3em] relative">
+          {binaryIndex === i ? (
+            <span className="text-white/60 tracking-[0.1em] text-[0.85em] whitespace-nowrap">
+              {wordToBinary(word)}
+            </span>
+          ) : (
+            <span className="whitespace-nowrap">{word}</span>
+          )}
+        </span>
+      ))}
+    </div>
+  );
+};
 
 const MainContent: React.FC<Props> = ({ setGlobalState }) => {
   const [showForm, setShowForm] = useState(false);
   const hasScrolledRef = useRef(false);
 
-  // number blinking
+  // 0 / 1 blinking
   const [leftValue, setLeftValue] = useState<"0" | "1">("0");
   const [rightValue, setRightValue] = useState<"0" | "1">("1");
 
-  // binary toggles
-  const [headerBinary, setHeaderBinary] = useState(false);
-  const [heroBinary, setHeroBinary] = useState(false);
-  const [beliefBinary, setBeliefBinary] = useState(false);
-
-  // blink numbers
   useEffect(() => {
     const l = setInterval(() => setLeftValue(v => (v === "0" ? "1" : "0")), 1800);
     const r = setInterval(() => setRightValue(v => (v === "0" ? "1" : "0")), 1100);
@@ -39,33 +64,6 @@ const MainContent: React.FC<Props> = ({ setGlobalState }) => {
       clearInterval(l);
       clearInterval(r);
     };
-  }, []);
-
-  // HEADER binary (short appearance)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setHeaderBinary(true);
-      setTimeout(() => setHeaderBinary(false), 1800);
-    }, 15000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // HERO binary (rare)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setHeroBinary(true);
-      setTimeout(() => setHeroBinary(false), 2500);
-    }, 10000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // BELIEF binary (very rare)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setBeliefBinary(true);
-      setTimeout(() => setBeliefBinary(false), 2600);
-    }, 14000);
-    return () => clearInterval(interval);
   }, []);
 
   // FIRST SCROLL → MINI FALL
@@ -87,84 +85,52 @@ const MainContent: React.FC<Props> = ({ setGlobalState }) => {
     <div className="relative z-10 w-full h-screen overflow-y-scroll snap-y snap-mandatory text-white overflow-x-hidden">
 
       {/* HEADER */}
-      <motion.header
-        className="fixed top-8 left-0 w-full flex justify-center z-20 pointer-events-none px-4"
-      >
-        <motion.h2
-          animate={{ opacity: [1, 0.7, 1] }}
-          transition={{ duration: 1.4 }}
-          className={`
-            uppercase font-light shimmer text-center
-            ${headerBinary ? "tracking-[0.15em] text-white/60" : "tracking-[0.5em] md:tracking-[0.8em]"}
-            text-[clamp(0.85rem,3vw,1.6rem)]
-            max-w-full break-all
-          `}
-        >
-          {headerBinary ? toBinary("MADEFOX") : "MADEFOX"}
-        </motion.h2>
-      </motion.header>
+      <header className="fixed top-8 left-0 w-full flex justify-center z-20 pointer-events-none px-4">
+        <AnimatedLine
+          text="MADEFOX"
+          fontSize="text-[clamp(0.9rem,3vw,1.6rem)]"
+          tracking="tracking-[0.45em]"
+          binaryInterval={18000}
+        />
+      </header>
 
       {/* HERO */}
       <section className="h-screen snap-start flex flex-col items-center justify-center text-center px-4">
-        <motion.div className="space-y-6 w-full max-w-[95vw]">
-          <motion.h1
-            className={`
-              uppercase font-light text-center
-              ${heroBinary ? "tracking-[0.12em] text-white/60" : "tracking-[0.24em] md:tracking-[0.35em]"}
-              text-[clamp(1.4rem,6vw,4.2rem)]
-              break-words
-            `}
-            animate={{ opacity: [1, 0.6, 1] }}
-            transition={{ duration: 1.2 }}
-          >
-            {heroBinary
-              ? toBinary("BUILDING MAGIC WITH")
-              : "BUILDING MAGIC WITH"}
-          </motion.h1>
+        <div className="space-y-6 w-full max-w-[95vw]">
+          <AnimatedLine
+            text="BUILDING MAGIC WITH"
+            fontSize="text-[clamp(1.4rem,6vw,4.2rem)]"
+            tracking="tracking-[0.22em] md:tracking-[0.35em]"
+            binaryInterval={9000}
+          />
 
-          {/* 0 & 1 LINE */}
+          {/* 0 & 1 */}
           <div className="flex items-center justify-center gap-3 md:gap-10 font-light tracking-[0.25em] md:tracking-[0.4em] text-[clamp(1.6rem,7vw,5rem)]">
             <motion.span animate={{ opacity: [0, 1] }}>{leftValue}</motion.span>
-
             <span className="inline-block w-[7ch] text-center text-white/70 tracking-[0.12em]">
               00100110
             </span>
-
             <motion.span animate={{ opacity: [0, 1] }}>{rightValue}</motion.span>
           </div>
-        </motion.div>
+        </div>
       </section>
 
       {/* BELIEF */}
       <section className="h-screen snap-start flex flex-col items-center justify-center text-center px-4 relative">
-        <motion.div className="space-y-4 w-full max-w-[95vw]">
-          <motion.p
-            className={`
-              uppercase text-center
-              ${beliefBinary ? "tracking-[0.1em] text-white/40" : "tracking-[0.2em] md:tracking-[0.3em] opacity-60"}
-              text-[clamp(0.8rem,3vw,1.2rem)]
-              break-words
-            `}
-            animate={{ opacity: [1, 0.5, 1] }}
-            transition={{ duration: 1.2 }}
-          >
-            {beliefBinary
-              ? toBinary("IF YOU DREAM OF BETTER ALGORITHMS -")
-              : "IF YOU DREAM OF BETTER ALGORITHMS -"}
-          </motion.p>
+        <div className="space-y-4 w-full max-w-[95vw]">
+          <AnimatedLine
+            text="IF YOU DREAM OF BETTER ALGORITHMS -"
+            fontSize="text-[clamp(0.8rem,3vw,1.2rem)]"
+            tracking="tracking-[0.18em] md:tracking-[0.3em]"
+            binaryInterval={14000}
+          />
 
-          <motion.h2
-            className={`
-              uppercase font-light text-center
-              ${beliefBinary ? "tracking-[0.14em] text-white/60" : "tracking-[0.28em] md:tracking-[0.4em]"}
-              text-[clamp(1.3rem,6vw,3.2rem)]
-              break-words
-            `}
-          >
-            {beliefBinary
-              ? toBinary("YOU ARE ONE OF US")
-              : "YOU ARE ONE OF US"}
-          </motion.h2>
+          <AnimatedLine
+            text="YOU ARE ONE OF US"
+            fontSize="text-[clamp(1.3rem,6vw,3.2rem)]"
+            tracking="tracking-[0.28em] md:tracking-[0.4em]"
+            binaryInterval={16000}
+          />
 
           <div className="pt-8">
             <button onClick={() => setShowForm(true)}>
@@ -178,7 +144,7 @@ const MainContent: React.FC<Props> = ({ setGlobalState }) => {
               </svg>
             </button>
           </div>
-        </motion.div>
+        </div>
 
         {/* FOOTER */}
         <footer className="absolute bottom-6 text-[10px] tracking-[0.3em] uppercase opacity-50">
