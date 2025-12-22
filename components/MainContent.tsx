@@ -7,41 +7,92 @@ interface Props {
   setGlobalState?: (s: PageState) => void;
 }
 
-/* Convert a single word to binary */
+/* ---------- UTILITIES ---------- */
+
+// convert single character to binary
+const charToBinary = (char: string) =>
+  char.charCodeAt(0).toString(2).padStart(8, "0");
+
+// convert word to binary
 const wordToBinary = (word: string) =>
   word
     .split("")
-    .map((c) => c.charCodeAt(0).toString(2).padStart(8, "0"))
+    .map((c) => charToBinary(c))
     .join(" ");
 
-const AnimatedLine: React.FC<{
-  text: string;
-  fontSize: string;
-  tracking: string;
-  binaryInterval: number;
-}> = ({ text, fontSize, tracking, binaryInterval }) => {
-  const words = text.split(" ");
-  const [binaryIndex, setBinaryIndex] = useState<number | null>(null);
+/* ---------- COMPONENTS ---------- */
+
+// COMPANY NAME WITH LETTER-LEVEL GLITCH
+const GlitchHeader: React.FC = () => {
+  const text = "MADEFOX";
+  const [glitchIndex, setGlitchIndex] = useState<number | null>(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setBinaryIndex(Math.floor(Math.random() * words.length));
-      setTimeout(() => setBinaryIndex(null), 1800);
-    }, binaryInterval);
-
+      const index = Math.floor(Math.random() * text.length);
+      setGlitchIndex(index);
+      setTimeout(() => setGlitchIndex(null), 600);
+    }, 3000);
     return () => clearInterval(interval);
-  }, [words.length, binaryInterval]);
+  }, [text.length]);
 
   return (
-    <div className={`flex flex-wrap justify-center ${tracking} ${fontSize}`}>
-      {words.map((word, i) => (
-        <span key={i} className="mx-[0.3em] relative">
-          {binaryIndex === i ? (
-            <span className="text-white/60 tracking-[0.1em] text-[0.85em] whitespace-nowrap">
-              {wordToBinary(word)}
-            </span>
+    <h2 className="uppercase font-light shimmer tracking-[0.5em] md:tracking-[0.8em] text-[clamp(0.8rem,3vw,1.6rem)] flex">
+      {text.split("").map((char, i) => (
+        <span key={i} className="relative mx-[0.12em]">
+          {glitchIndex === i ? (
+            <motion.span
+              initial={{ opacity: 0.2 }}
+              animate={{ opacity: [0.2, 1, 0.4] }}
+              transition={{ duration: 0.5 }}
+              className="text-white/60 text-[0.75em] tracking-[0.1em]"
+            >
+              {charToBinary(char)}
+            </motion.span>
           ) : (
-            <span className="whitespace-nowrap">{word}</span>
+            char
+          )}
+        </span>
+      ))}
+    </h2>
+  );
+};
+
+// WORD-LEVEL BINARY GLITCH LINE
+const GlitchLine: React.FC<{
+  text: string;
+  fontSize: string;
+  tracking: string;
+}> = ({ text, fontSize, tracking }) => {
+  const words = text.split(" ");
+  const [glitchWord, setGlitchWord] = useState<number | null>(null);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const index = Math.floor(Math.random() * words.length);
+      setGlitchWord(index);
+      setTimeout(() => setGlitchWord(null), 700);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [words.length]);
+
+  return (
+    <div
+      className={`flex flex-wrap justify-center ${fontSize} ${tracking} leading-tight max-w-[92vw]`}
+    >
+      {words.map((word, i) => (
+        <span key={i} className="mx-[0.3em] whitespace-nowrap">
+          {glitchWord === i ? (
+            <motion.span
+              initial={{ opacity: 0.3 }}
+              animate={{ opacity: [0.3, 1, 0.5] }}
+              transition={{ duration: 0.5 }}
+              className="text-white/60 text-[0.75em] tracking-[0.1em]"
+            >
+              {wordToBinary(word)}
+            </motion.span>
+          ) : (
+            word
           )}
         </span>
       ))}
@@ -49,11 +100,13 @@ const AnimatedLine: React.FC<{
   );
 };
 
+/* ---------- MAIN ---------- */
+
 const MainContent: React.FC<Props> = ({ setGlobalState }) => {
   const [showForm, setShowForm] = useState(false);
   const hasScrolledRef = useRef(false);
 
-  // 0 / 1 blinking
+  // blinking numbers
   const [leftValue, setLeftValue] = useState<"0" | "1">("0");
   const [rightValue, setRightValue] = useState<"0" | "1">("1");
 
@@ -85,31 +138,28 @@ const MainContent: React.FC<Props> = ({ setGlobalState }) => {
     <div className="relative z-10 w-full h-screen overflow-y-scroll snap-y snap-mandatory text-white overflow-x-hidden">
 
       {/* HEADER */}
-      <header className="fixed top-8 left-0 w-full flex justify-center z-20 pointer-events-none px-4">
-        <AnimatedLine
-          text="MADEFOX"
-          fontSize="text-[clamp(0.9rem,3vw,1.6rem)]"
-          tracking="tracking-[0.45em]"
-          binaryInterval={18000}
-        />
+      <header className="fixed top-6 left-0 w-full flex justify-center z-20 pointer-events-none px-4">
+        <GlitchHeader />
       </header>
 
       {/* HERO */}
       <section className="h-screen snap-start flex flex-col items-center justify-center text-center px-4">
-        <div className="space-y-6 w-full max-w-[95vw]">
-          <AnimatedLine
+        <div className="space-y-6">
+          <GlitchLine
             text="BUILDING MAGIC WITH"
-            fontSize="text-[clamp(1.4rem,6vw,4.2rem)]"
+            fontSize="text-[clamp(1.2rem,6vw,4rem)]"
             tracking="tracking-[0.22em] md:tracking-[0.35em]"
-            binaryInterval={9000}
           />
 
           {/* 0 & 1 */}
-          <div className="flex items-center justify-center gap-3 md:gap-10 font-light tracking-[0.25em] md:tracking-[0.4em] text-[clamp(1.6rem,7vw,5rem)]">
+          <div className="flex items-center justify-center gap-4 md:gap-10 font-light tracking-[0.25em] md:tracking-[0.4em] text-[clamp(1.5rem,7vw,4.8rem)]">
             <motion.span animate={{ opacity: [0, 1] }}>{leftValue}</motion.span>
-            <span className="inline-block w-[7ch] text-center text-white/70 tracking-[0.12em]">
+
+            {/* fixed-width binary & */}
+            <span className="inline-block w-[6ch] text-center text-white/60 tracking-[0.12em] text-[0.7em]">
               00100110
             </span>
+
             <motion.span animate={{ opacity: [0, 1] }}>{rightValue}</motion.span>
           </div>
         </div>
@@ -117,26 +167,24 @@ const MainContent: React.FC<Props> = ({ setGlobalState }) => {
 
       {/* BELIEF */}
       <section className="h-screen snap-start flex flex-col items-center justify-center text-center px-4 relative">
-        <div className="space-y-4 w-full max-w-[95vw]">
-          <AnimatedLine
+        <div className="space-y-4">
+          <GlitchLine
             text="IF YOU DREAM OF BETTER ALGORITHMS -"
-            fontSize="text-[clamp(0.8rem,3vw,1.2rem)]"
+            fontSize="text-[clamp(0.75rem,3vw,1.2rem)]"
             tracking="tracking-[0.18em] md:tracking-[0.3em]"
-            binaryInterval={14000}
           />
 
-          <AnimatedLine
+          <GlitchLine
             text="YOU ARE ONE OF US"
-            fontSize="text-[clamp(1.3rem,6vw,3.2rem)]"
+            fontSize="text-[clamp(1.2rem,6vw,3rem)]"
             tracking="tracking-[0.28em] md:tracking-[0.4em]"
-            binaryInterval={16000}
           />
 
           <div className="pt-8">
             <button onClick={() => setShowForm(true)}>
               <svg
-                width="80"
-                height="80"
+                width="76"
+                height="76"
                 viewBox="0 0 100 100"
                 className="triangle-pulse stroke-white fill-transparent stroke-[0.6px]"
               >
