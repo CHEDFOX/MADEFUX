@@ -7,7 +7,7 @@ interface Props {
   setGlobalState?: (s: PageState) => void;
 }
 
-// text → binary (ASCII)
+// text → binary (ASCII, safe spacing)
 const toBinary = (text: string) =>
   text
     .split("")
@@ -22,17 +22,16 @@ const MainContent: React.FC<Props> = ({ setGlobalState }) => {
   const [showForm, setShowForm] = useState(false);
   const hasScrolledRef = useRef(false);
 
-  // blinking values
+  // number blinking
   const [leftValue, setLeftValue] = useState<"0" | "1">("0");
   const [rightValue, setRightValue] = useState<"0" | "1">("1");
-  const [andValue] = useState<"00100110">("00100110");
 
-  // binary toggles (LOW frequency)
+  // binary toggles
   const [headerBinary, setHeaderBinary] = useState(false);
   const [heroBinary, setHeroBinary] = useState(false);
   const [beliefBinary, setBeliefBinary] = useState(false);
 
-  // number blinking
+  // blink numbers
   useEffect(() => {
     const l = setInterval(() => setLeftValue(v => (v === "0" ? "1" : "0")), 1800);
     const r = setInterval(() => setRightValue(v => (v === "0" ? "1" : "0")), 1100);
@@ -42,28 +41,31 @@ const MainContent: React.FC<Props> = ({ setGlobalState }) => {
     };
   }, []);
 
-  // HEADER binary (very rare)
+  // HEADER binary (short appearance)
   useEffect(() => {
-    const i = setInterval(() => {
-      setHeaderBinary(v => !v);
-    }, 16000);
-    return () => clearInterval(i);
+    const interval = setInterval(() => {
+      setHeaderBinary(true);
+      setTimeout(() => setHeaderBinary(false), 1800);
+    }, 15000);
+    return () => clearInterval(interval);
   }, []);
 
-  // HERO binary
+  // HERO binary (rare)
   useEffect(() => {
-    const i = setInterval(() => {
-      setHeroBinary(v => !v);
-    }, 9000);
-    return () => clearInterval(i);
+    const interval = setInterval(() => {
+      setHeroBinary(true);
+      setTimeout(() => setHeroBinary(false), 2500);
+    }, 10000);
+    return () => clearInterval(interval);
   }, []);
 
-  // BELIEF binary (even slower)
+  // BELIEF binary (very rare)
   useEffect(() => {
-    const i = setInterval(() => {
-      setBeliefBinary(v => !v);
-    }, 12000);
-    return () => clearInterval(i);
+    const interval = setInterval(() => {
+      setBeliefBinary(true);
+      setTimeout(() => setBeliefBinary(false), 2600);
+    }, 14000);
+    return () => clearInterval(interval);
   }, []);
 
   // FIRST SCROLL → MINI FALL
@@ -84,38 +86,33 @@ const MainContent: React.FC<Props> = ({ setGlobalState }) => {
   return (
     <div className="relative z-10 w-full h-screen overflow-y-scroll snap-y snap-mandatory text-white overflow-x-hidden">
 
-      {/* HEADER — MADEFOX */}
+      {/* HEADER */}
       <motion.header
-        initial={{ opacity: 0 }}
-        animate={{ opacity: [1, 0.7, 1] }}
-        transition={{ duration: 1.6 }}
-        className="fixed top-10 left-0 w-full flex justify-center z-20 pointer-events-none"
+        className="fixed top-8 left-0 w-full flex justify-center z-20 pointer-events-none px-4"
       >
-        <h2
+        <motion.h2
+          animate={{ opacity: [1, 0.7, 1] }}
+          transition={{ duration: 1.4 }}
           className={`
-            uppercase font-light whitespace-nowrap shimmer
-            ${headerBinary ? "text-white/60 tracking-[0.18em]" : "tracking-[0.6em] md:tracking-[0.8em]"}
-            text-[clamp(0.9rem,3vw,1.6rem)]
+            uppercase font-light shimmer text-center
+            ${headerBinary ? "tracking-[0.15em] text-white/60" : "tracking-[0.5em] md:tracking-[0.8em]"}
+            text-[clamp(0.85rem,3vw,1.6rem)]
+            max-w-full break-all
           `}
         >
           {headerBinary ? toBinary("MADEFOX") : "MADEFOX"}
-        </h2>
+        </motion.h2>
       </motion.header>
 
       {/* HERO */}
       <section className="h-screen snap-start flex flex-col items-center justify-center text-center px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 40, filter: "blur(10px)" }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          transition={{ duration: 1.2 }}
-          className="space-y-8 w-full"
-        >
-          {/* HERO LINE */}
+        <motion.div className="space-y-6 w-full max-w-[95vw]">
           <motion.h1
             className={`
-              uppercase font-light whitespace-nowrap
-              ${heroBinary ? "text-white/60 tracking-[0.15em]" : "tracking-[0.26em] md:tracking-[0.35em]"}
-              text-[clamp(1.6rem,6vw,4.5rem)]
+              uppercase font-light text-center
+              ${heroBinary ? "tracking-[0.12em] text-white/60" : "tracking-[0.24em] md:tracking-[0.35em]"}
+              text-[clamp(1.4rem,6vw,4.2rem)]
+              break-words
             `}
             animate={{ opacity: [1, 0.6, 1] }}
             transition={{ duration: 1.2 }}
@@ -126,39 +123,27 @@ const MainContent: React.FC<Props> = ({ setGlobalState }) => {
           </motion.h1>
 
           {/* 0 & 1 LINE */}
-          <div
-            className="
-              flex items-center justify-center
-              gap-4 md:gap-12
-              font-light
-              tracking-[0.28em] md:tracking-[0.4em]
-              text-[clamp(1.8rem,7vw,5.2rem)]
-              whitespace-nowrap
-            "
-          >
-            <motion.span key={leftValue} animate={{ opacity: [0, 1] }}>
-              {leftValue}
-            </motion.span>
+          <div className="flex items-center justify-center gap-3 md:gap-10 font-light tracking-[0.25em] md:tracking-[0.4em] text-[clamp(1.6rem,7vw,5rem)]">
+            <motion.span animate={{ opacity: [0, 1] }}>{leftValue}</motion.span>
 
-            <span className="inline-block w-[7ch] md:w-[8ch] text-center text-white/70 tracking-[0.15em]">
-              {andValue}
+            <span className="inline-block w-[7ch] text-center text-white/70 tracking-[0.12em]">
+              00100110
             </span>
 
-            <motion.span key={rightValue} animate={{ opacity: [0, 1] }}>
-              {rightValue}
-            </motion.span>
+            <motion.span animate={{ opacity: [0, 1] }}>{rightValue}</motion.span>
           </div>
         </motion.div>
       </section>
 
       {/* BELIEF */}
       <section className="h-screen snap-start flex flex-col items-center justify-center text-center px-4 relative">
-        <motion.div className="space-y-6 w-full">
+        <motion.div className="space-y-4 w-full max-w-[95vw]">
           <motion.p
             className={`
-              uppercase whitespace-nowrap
-              ${beliefBinary ? "text-white/40 tracking-[0.12em]" : "tracking-[0.22em] md:tracking-[0.3em] opacity-60"}
-              text-[clamp(0.85rem,3vw,1.3rem)]
+              uppercase text-center
+              ${beliefBinary ? "tracking-[0.1em] text-white/40" : "tracking-[0.2em] md:tracking-[0.3em] opacity-60"}
+              text-[clamp(0.8rem,3vw,1.2rem)]
+              break-words
             `}
             animate={{ opacity: [1, 0.5, 1] }}
             transition={{ duration: 1.2 }}
@@ -170,9 +155,10 @@ const MainContent: React.FC<Props> = ({ setGlobalState }) => {
 
           <motion.h2
             className={`
-              uppercase whitespace-nowrap font-light
-              ${beliefBinary ? "text-white/60 tracking-[0.18em]" : "tracking-[0.32em] md:tracking-[0.4em]"}
-              text-[clamp(1.5rem,6vw,3.3rem)]
+              uppercase font-light text-center
+              ${beliefBinary ? "tracking-[0.14em] text-white/60" : "tracking-[0.28em] md:tracking-[0.4em]"}
+              text-[clamp(1.3rem,6vw,3.2rem)]
+              break-words
             `}
           >
             {beliefBinary
@@ -180,11 +166,11 @@ const MainContent: React.FC<Props> = ({ setGlobalState }) => {
               : "YOU ARE ONE OF US"}
           </motion.h2>
 
-          <div className="pt-10">
+          <div className="pt-8">
             <button onClick={() => setShowForm(true)}>
               <svg
-                width="90"
-                height="90"
+                width="80"
+                height="80"
                 viewBox="0 0 100 100"
                 className="triangle-pulse stroke-white fill-transparent stroke-[0.6px]"
               >
@@ -195,7 +181,7 @@ const MainContent: React.FC<Props> = ({ setGlobalState }) => {
         </motion.div>
 
         {/* FOOTER */}
-        <footer className="absolute bottom-8 text-[10px] tracking-[0.35em] uppercase opacity-50">
+        <footer className="absolute bottom-6 text-[10px] tracking-[0.3em] uppercase opacity-50">
           <a href="mailto:hello@madefox.com">HELLO@MADEFOX.COM</a>
         </footer>
       </section>
