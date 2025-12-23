@@ -13,11 +13,12 @@ const wordToBinary = (word: string) =>
 
 /* ===================== GLITCH WORD LINE ===================== */
 /*
+  FINAL RULES (ENFORCED):
   ✔ Original word defines layout
-  ✔ Original word hidden when binary active
   ✔ Binary replaces word visually
   ✔ Binary is smaller
-  ✔ REAL cyber glitch (jitter + RGB split)
+  ✔ Binary is CLIPPED to word box
+  ✔ No overflow possible
 */
 
 const GlitchLine: React.FC<{
@@ -32,7 +33,7 @@ const GlitchLine: React.FC<{
     const interval = setInterval(() => {
       const idx = Math.floor(Math.random() * words.length);
       setActiveIndex(idx);
-      setTimeout(() => setActiveIndex(null), 700);
+      setTimeout(() => setActiveIndex(null), 600);
     }, 3000);
 
     return () => clearInterval(interval);
@@ -46,32 +47,31 @@ const GlitchLine: React.FC<{
       {words.map((word, i) => (
         <span
           key={i}
-          className="relative mx-[0.35em] inline-flex items-center justify-center"
+          className="relative mx-[0.35em] inline-flex items-center justify-center overflow-hidden"
           style={{
-            minWidth: `${word.length}ch`,
+            width: "fit-content",
             height: "1em",
           }}
         >
-          {/* ORIGINAL WORD (HIDDEN WHEN ACTIVE) */}
+          {/* ORIGINAL WORD (DEFINES BOX) */}
           <span
-            className="transition-opacity duration-75"
+            className="whitespace-nowrap transition-opacity duration-75"
             style={{ opacity: activeIndex === i ? 0 : 1 }}
           >
             {word}
           </span>
 
-          {/* BINARY — TRUE REPLACEMENT */}
+          {/* BINARY (CLIPPED INSIDE BOX) */}
           {activeIndex === i && (
             <motion.span
               initial={{ opacity: 0 }}
               animate={{
                 opacity: [0, 1, 0.7, 1],
-                x: [0, -2, 2, -1, 1, 0],
+                x: [0, -1, 1, -1, 1, 0],
                 textShadow: [
                   "0 0 0 rgba(0,0,0,0)",
-                  "2px 0 red, -2px 0 cyan",
-                  "-2px 0 red, 2px 0 cyan",
                   "1px 0 red, -1px 0 cyan",
+                  "-1px 0 red, 1px 0 cyan",
                   "0 0 0 rgba(0,0,0,0)",
                 ],
               }}
@@ -84,7 +84,8 @@ const GlitchLine: React.FC<{
                 pointer-events-none
               "
               style={{
-                transform: "scale(0.6)", // SMALL ENOUGH TO FIT
+                transform: "scale(0.55)", // SMALL ENOUGH
+                whiteSpace: "nowrap",
               }}
             >
               {wordToBinary(word)}
@@ -104,7 +105,6 @@ const MainContent: React.FC<{ setGlobalState?: (s: PageState) => void }> = ({
   const [showForm, setShowForm] = useState(false);
   const hasScrolled = useRef(false);
 
-  // blinking numbers
   const [left, setLeft] = useState<"0" | "1">("0");
   const [right, setRight] = useState<"0" | "1">("1");
 
@@ -117,7 +117,6 @@ const MainContent: React.FC<{ setGlobalState?: (s: PageState) => void }> = ({
     };
   }, []);
 
-  // first scroll → threshold animation
   useEffect(() => {
     const onScroll = () => {
       if (!hasScrolled.current && window.scrollY > 30) {
@@ -135,13 +134,7 @@ const MainContent: React.FC<{ setGlobalState?: (s: PageState) => void }> = ({
 
       {/* FIXED LOGO */}
       <header className="fixed top-6 left-0 w-full flex justify-center z-30 pointer-events-none">
-        <h1
-          className="
-            uppercase font-light shimmer
-            text-[clamp(1rem,3.5vw,1.8rem)]
-            tracking-[0.35em]
-          "
-        >
+        <h1 className="uppercase font-light shimmer text-[clamp(1rem,3.5vw,1.8rem)] tracking-[0.35em]">
           MADEFOX
         </h1>
       </header>
