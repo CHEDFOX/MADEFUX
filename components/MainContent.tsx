@@ -11,7 +11,7 @@ const charToBinary = (c: string) =>
 const wordToBinary = (word: string) =>
   word.split("").map(charToBinary).join(" ");
 
-/* ===================== GLITCH LINE (WIDTH-STABLE) ===================== */
+/* ===================== GLITCH LINE ===================== */
 
 const GlitchLine: React.FC<{
   text: string;
@@ -36,8 +36,8 @@ const GlitchLine: React.FC<{
       style={{ lineHeight: "1.15" }}
     >
       {words.map((word, i) => {
-        // Reserve enough width so binary never expands line
-        const reservedWidthCh = Math.max(word.length * 8, word.length * 1.2);
+        // reserve width so binary never shifts the line
+        const reservedWidth = word.length * 8;
 
         return (
           <span
@@ -45,22 +45,19 @@ const GlitchLine: React.FC<{
             className="relative mx-[0.35em] inline-flex items-center justify-center"
             style={{
               height: "1em",
-              minWidth: `${reservedWidthCh}ch`,
+              minWidth: `${reservedWidth}ch`,
             }}
           >
             {activeIndex === i ? (
-              <motion.span
-                initial={{ opacity: 0 }}
-                animate={{ opacity: [0, 1, 0.5] }}
-                transition={{ duration: 0.5 }}
-                className="text-white/60 tracking-[0.08em]"
+              <span
+                className="cyber-glitch text-white/70 tracking-[0.08em]"
                 style={{
                   transform: "scale(0.7)",
                   whiteSpace: "nowrap",
                 }}
               >
                 {wordToBinary(word)}
-              </motion.span>
+              </span>
             ) : (
               <span style={{ whiteSpace: "nowrap" }}>{word}</span>
             )}
@@ -77,9 +74,9 @@ const MainContent: React.FC<{ setGlobalState?: (s: PageState) => void }> = ({
   setGlobalState,
 }) => {
   const [showForm, setShowForm] = useState(false);
+  const [fallOnce, setFallOnce] = useState(false);
   const hasScrolled = useRef(false);
 
-  // blinking numbers
   const [left, setLeft] = useState<"0" | "1">("0");
   const [right, setRight] = useState<"0" | "1">("1");
 
@@ -92,94 +89,144 @@ const MainContent: React.FC<{ setGlobalState?: (s: PageState) => void }> = ({
     };
   }, []);
 
-  // first scroll → threshold animation
+  // FIRST SCROLL → FALLING THRESHOLD (ONCE)
   useEffect(() => {
     const onScroll = () => {
-      if (!hasScrolled.current && window.scrollY > 30) {
+      if (!hasScrolled.current && window.scrollY > 40) {
         hasScrolled.current = true;
+        setFallOnce(true);
         setGlobalState?.(PageState.SCROLL_FALL);
-        setTimeout(() => setGlobalState?.(PageState.CONTENT), 900);
+
+        setTimeout(() => {
+          setFallOnce(false);
+          setGlobalState?.(PageState.CONTENT);
+        }, 700);
       }
     };
+
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, [setGlobalState]);
 
   return (
-    <div className="relative h-screen w-full snap-y snap-mandatory overflow-y-scroll overflow-x-hidden text-white">
+    <>
+      {/* ===================== INLINE STYLES ===================== */}
+      <style>{`
+        @keyframes cyberGlitch {
+          0% {
+            text-shadow: none;
+            clip-path: inset(0 0 0 0);
+            opacity: 1;
+          }
+          20% {
+            text-shadow: 2px 0 red, -2px 0 cyan;
+            clip-path: inset(15% 0 70% 0);
+          }
+          40% {
+            text-shadow: -2px 0 red, 2px 0 cyan;
+            clip-path: inset(70% 0 15% 0);
+          }
+          60% {
+            text-shadow: 1px 0 magenta, -1px 0 lime;
+            clip-path: inset(40% 0 40% 0);
+            opacity: 0.85;
+          }
+          100% {
+            text-shadow: none;
+            clip-path: inset(0 0 0 0);
+            opacity: 1;
+          }
+        }
 
-      {/* ===================== FIXED LOGO ===================== */}
-      <header className="fixed top-6 left-0 w-full flex justify-center z-30 pointer-events-none">
-        <h1
-          className="
-            uppercase font-light shimmer
-            text-[clamp(1rem,3.5vw,1.8rem)]
-            tracking-[0.35em]
-            text-white
-          "
+        .cyber-glitch {
+          animation: cyberGlitch 0.35s steps(2, end);
+        }
+
+        @keyframes fallThrough {
+          from {
+            transform: translateY(0);
+            filter: blur(0);
+          }
+          to {
+            transform: translateY(120px);
+            filter: blur(6px);
+          }
+        }
+
+        .fall-once {
+          animation: fallThrough 0.6s ease-in forwards;
+        }
+      `}</style>
+
+      <div className="relative h-screen w-full snap-y snap-mandatory overflow-y-scroll overflow-x-hidden text-white">
+
+        {/* FIXED LOGO */}
+        <header className="fixed top-6 left-0 w-full flex justify-center z-30 pointer-events-none">
+          <h1 className="uppercase font-light shimmer text-[clamp(1rem,3.5vw,1.8rem)] tracking-[0.35em]">
+            MADEFOX
+          </h1>
+        </header>
+
+        {/* HERO */}
+        <section
+          className={`h-screen snap-start flex items-center justify-center text-center px-4 ${
+            fallOnce ? "fall-once" : ""
+          }`}
         >
-          MADEFOX
-        </h1>
-      </header>
+          <div className="space-y-6 max-w-[95vw]">
+            <GlitchLine
+              text="BUILDING MAGIC WITH"
+              size="text-[clamp(1.1rem,4.5vw,2.8rem)]"
+              tracking="tracking-[0.25em] md:tracking-[0.3em]"
+            />
 
-      {/* ===================== HERO ===================== */}
-      <section className="h-screen snap-start flex items-center justify-center text-center px-4">
-        <div className="space-y-6 max-w-[95vw]">
-          <GlitchLine
-            text="BUILDING MAGIC WITH"
-            size="text-[clamp(1.1rem,4.5vw,2.8rem)]"
-            tracking="tracking-[0.25em] md:tracking-[0.3em]"
-          />
-
-          {/* 0 & 1 — NORMAL AMPERSAND */}
-          <div className="flex items-center justify-center gap-6 md:gap-10 tracking-[0.3em] text-[clamp(1.4rem,6vw,3.2rem)] leading-none">
-            <motion.span animate={{ opacity: [0, 1] }}>{left}</motion.span>
-            <span>&</span>
-            <motion.span animate={{ opacity: [0, 1] }}>{right}</motion.span>
+            <div className="flex items-center justify-center gap-6 tracking-[0.3em] text-[clamp(1.4rem,6vw,3.2rem)]">
+              <motion.span>{left}</motion.span>
+              <span>&</span>
+              <motion.span>{right}</motion.span>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ===================== BELIEF ===================== */}
-      <section className="h-screen snap-start flex items-center justify-center text-center px-4 relative">
-        <div className="space-y-4 max-w-[95vw]">
-          <GlitchLine
-            text="IF YOU DREAM OF BETTER ALGORITHMS -"
-            size="text-[clamp(0.85rem,3vw,1.2rem)]"
-            tracking="tracking-[0.2em] md:tracking-[0.3em]"
-          />
+        {/* BELIEF */}
+        <section className="h-screen snap-start flex items-center justify-center text-center px-4 relative">
+          <div className="space-y-4 max-w-[95vw]">
+            <GlitchLine
+              text="IF YOU DREAM OF BETTER ALGORITHMS -"
+              size="text-[clamp(0.85rem,3vw,1.2rem)]"
+              tracking="tracking-[0.2em] md:tracking-[0.3em]"
+            />
 
-          <GlitchLine
-            text="YOU ARE ONE OF US"
-            size="text-[clamp(1.2rem,6vw,3rem)]"
-            tracking="tracking-[0.3em] md:tracking-[0.4em]"
-          />
+            <GlitchLine
+              text="YOU ARE ONE OF US"
+              size="text-[clamp(1.2rem,6vw,3rem)]"
+              tracking="tracking-[0.3em] md:tracking-[0.4em]"
+            />
 
-          <div className="pt-8">
-            <button onClick={() => setShowForm(true)}>
-              <svg
-                width="76"
-                height="76"
-                viewBox="0 0 100 100"
-                className="triangle-pulse stroke-white fill-transparent stroke-[0.6px]"
-              >
-                <path d="M50 15 L85 85 L15 85 Z" />
-              </svg>
-            </button>
+            <div className="pt-8">
+              <button onClick={() => setShowForm(true)}>
+                <svg
+                  width="76"
+                  height="76"
+                  viewBox="0 0 100 100"
+                  className="triangle-pulse stroke-white fill-transparent stroke-[0.6px]"
+                >
+                  <path d="M50 15 L85 85 L15 85 Z" />
+                </svg>
+              </button>
+            </div>
           </div>
-        </div>
 
-        {/* FOOTER */}
-        <footer className="absolute bottom-6 text-[10px] tracking-[0.3em] uppercase opacity-50">
-          <a href="mailto:hello@madefox.com">HELLO@MADEFOX.COM</a>
-        </footer>
-      </section>
+          <footer className="absolute bottom-6 text-[10px] tracking-[0.3em] uppercase opacity-50">
+            <a href="mailto:hello@madefox.com">HELLO@MADEFOX.COM</a>
+          </footer>
+        </section>
 
-      {/* ===================== CONTACT ===================== */}
-      <AnimatePresence>
-        {showForm && <ContactForm onClose={() => setShowForm(false)} />}
-      </AnimatePresence>
-    </div>
+        <AnimatePresence>
+          {showForm && <ContactForm onClose={() => setShowForm(false)} />}
+        </AnimatePresence>
+      </div>
+    </>
   );
 };
 
