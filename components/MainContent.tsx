@@ -11,13 +11,17 @@ const charToBinary = (c: string) =>
 const wordToBinary = (word: string) =>
   word.split("").map(charToBinary).join(" ");
 
-/* ===================== GLITCH LINE (STABLE) ===================== */
+/* ===================== SHARED TEXT SYSTEM ===================== */
+/* SAME SIZE, SAME ALIGNMENT EVERYWHERE */
 
-const GlitchLine: React.FC<{
-  text: string;
-  size: string;
-  tracking: string;
-}> = ({ text, size, tracking }) => {
+const TEXT_SIZE =
+  "text-[clamp(1rem,4.2vw,2.4rem)]"; // ONE SYSTEM
+const TEXT_TRACKING =
+  "tracking-[0.28em] md:tracking-[0.32em]";
+
+/* ===================== GLITCH LINE ===================== */
+
+const GlitchLine: React.FC<{ text: string }> = ({ text }) => {
   const words = text.split(" ");
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
@@ -32,15 +36,14 @@ const GlitchLine: React.FC<{
 
   return (
     <div
-      className={`flex justify-center flex-wrap ${size} ${tracking}`}
+      className={`flex flex-wrap justify-center ${TEXT_SIZE} ${TEXT_TRACKING}`}
       style={{
         lineHeight: "1.15",
-        maxWidth: "95vw",
+        maxWidth: "92vw",
         marginInline: "auto",
       }}
     >
       {words.map((word, i) => {
-        // Reserve enough width so binary never expands the line
         const reservedWidth = word.length * 8;
 
         return (
@@ -54,9 +57,9 @@ const GlitchLine: React.FC<{
           >
             {activeIndex === i ? (
               <span
-                className="cyber-glitch text-white/70 tracking-[0.08em]"
+                className="cyber-glitch text-white/70"
                 style={{
-                  transform: "scale(0.6)", // 🔑 REDUCED SCALE (FIX)
+                  transform: "scale(0.6)", // 🔑 ONLY CHANGE
                   transformOrigin: "center",
                   whiteSpace: "nowrap",
                 }}
@@ -94,7 +97,7 @@ const MainContent: React.FC<{ setGlobalState?: (s: PageState) => void }> = ({
     };
   }, []);
 
-  // FIRST SCROLL → FALL (ONCE)
+  // FIRST SCROLL → FALL ONCE
   useEffect(() => {
     const onScroll = () => {
       if (!hasScrolled.current && window.scrollY > 40) {
@@ -108,14 +111,13 @@ const MainContent: React.FC<{ setGlobalState?: (s: PageState) => void }> = ({
         }, 700);
       }
     };
-
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, [setGlobalState]);
 
   return (
     <>
-      {/* INLINE CSS (NO FILE NEEDED) */}
+      {/* INLINE CSS */}
       <style>{`
         @keyframes cyberGlitch {
           0% { text-shadow: none; clip-path: inset(0); }
@@ -139,25 +141,21 @@ const MainContent: React.FC<{ setGlobalState?: (s: PageState) => void }> = ({
 
         {/* FIXED LOGO */}
         <header className="fixed top-6 left-0 w-full flex justify-center z-30 pointer-events-none">
-          <h1 className="uppercase font-light shimmer text-[clamp(1rem,3.5vw,1.8rem)] tracking-[0.35em]">
+          <h1 className="uppercase font-light shimmer tracking-[0.35em] text-[clamp(1rem,3.5vw,1.8rem)]">
             MADEFOX
           </h1>
         </header>
 
-        {/* HERO */}
+        {/* VIEWPORT 1 */}
         <section
           className={`h-screen snap-start flex items-center justify-center text-center px-4 ${
             fallOnce ? "fall-once" : ""
           }`}
         >
           <div className="space-y-6 w-full">
-            <GlitchLine
-              text="BUILDING MAGIC WITH"
-              size="text-[clamp(1.1rem,4.5vw,2.8rem)]"
-              tracking="tracking-[0.25em] md:tracking-[0.3em]"
-            />
+            <GlitchLine text="BUILDING MAGIC WITH" />
 
-            <div className="flex items-center justify-center gap-6 tracking-[0.3em] text-[clamp(1.4rem,6vw,3.2rem)]">
+            <div className={`flex items-center justify-center gap-6 ${TEXT_SIZE} ${TEXT_TRACKING}`}>
               <motion.span>{left}</motion.span>
               <span>&</span>
               <motion.span>{right}</motion.span>
@@ -165,20 +163,11 @@ const MainContent: React.FC<{ setGlobalState?: (s: PageState) => void }> = ({
           </div>
         </section>
 
-        {/* BELIEF */}
+        {/* VIEWPORT 2 */}
         <section className="h-screen snap-start flex items-center justify-center text-center px-4 relative">
-          <div className="space-y-4 w-full">
-            <GlitchLine
-              text="IF YOU DREAM OF BETTER ALGORITHMS -"
-              size="text-[clamp(0.85rem,3vw,1.2rem)]"
-              tracking="tracking-[0.2em] md:tracking-[0.3em]"
-            />
-
-            <GlitchLine
-              text="YOU ARE ONE OF US"
-              size="text-[clamp(1.2rem,6vw,3rem)]"
-              tracking="tracking-[0.3em] md:tracking-[0.4em]"
-            />
+          <div className="space-y-6 w-full">
+            <GlitchLine text="IF YOU DREAM OF BETTER ALGORITHMS -" />
+            <GlitchLine text="YOU ARE ONE OF US" />
 
             <div className="pt-8">
               <button onClick={() => setShowForm(true)}>
