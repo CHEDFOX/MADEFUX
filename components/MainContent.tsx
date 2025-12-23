@@ -13,11 +13,11 @@ const wordToBinary = (word: string) =>
 
 /* ===================== GLITCH WORD LINE ===================== */
 /*
-  RULES:
-  - Original word always stays (defines layout)
-  - Binary is absolute overlay
-  - Binary is scaled down
-  - No layout shift, ever
+  ✔ Original word defines layout
+  ✔ Original word hidden when binary active
+  ✔ Binary replaces word visually
+  ✔ Binary is smaller
+  ✔ REAL cyber glitch (jitter + RGB split)
 */
 
 const GlitchLine: React.FC<{
@@ -32,7 +32,7 @@ const GlitchLine: React.FC<{
     const interval = setInterval(() => {
       const idx = Math.floor(Math.random() * words.length);
       setActiveIndex(idx);
-      setTimeout(() => setActiveIndex(null), 600);
+      setTimeout(() => setActiveIndex(null), 700);
     }, 3000);
 
     return () => clearInterval(interval);
@@ -52,19 +52,26 @@ const GlitchLine: React.FC<{
             height: "1em",
           }}
         >
-          {/* ORIGINAL WORD (ALWAYS DEFINES LAYOUT) */}
-          <span className="opacity-100">{word}</span>
+          {/* ORIGINAL WORD (HIDDEN WHEN ACTIVE) */}
+          <span
+            className="transition-opacity duration-75"
+            style={{ opacity: activeIndex === i ? 0 : 1 }}
+          >
+            {word}
+          </span>
 
-          {/* BINARY OVERLAY (SMALL, GLITCHY, NO LAYOUT EFFECT) */}
+          {/* BINARY — TRUE REPLACEMENT */}
           {activeIndex === i && (
             <motion.span
               initial={{ opacity: 0 }}
               animate={{
-                opacity: [0, 1, 0.6, 1],
+                opacity: [0, 1, 0.7, 1],
+                x: [0, -2, 2, -1, 1, 0],
                 textShadow: [
                   "0 0 0 rgba(0,0,0,0)",
+                  "2px 0 red, -2px 0 cyan",
+                  "-2px 0 red, 2px 0 cyan",
                   "1px 0 red, -1px 0 cyan",
-                  "-1px 0 red, 1px 0 cyan",
                   "0 0 0 rgba(0,0,0,0)",
                 ],
               }}
@@ -77,7 +84,7 @@ const GlitchLine: React.FC<{
                 pointer-events-none
               "
               style={{
-                transform: "scale(0.65)", // 👈 SMALL ENOUGH TO FIT
+                transform: "scale(0.6)", // SMALL ENOUGH TO FIT
               }}
             >
               {wordToBinary(word)}
