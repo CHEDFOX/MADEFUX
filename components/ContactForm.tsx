@@ -98,7 +98,7 @@ const ContactForm: React.FC<ContactFormProps> = ({
             <input
               required
               type="email"
-              placeholder="YOUR SIGNAL"
+              placeholder=" E-MAIL ADRESS "
               className="w-full bg-transparent border-b border-white/10 py-4 text-white text-xs tracking-widest placeholder:text-white/20 focus:outline-none focus:border-white"
               value={formData.email}
               onChange={(e) =>
@@ -109,7 +109,7 @@ const ContactForm: React.FC<ContactFormProps> = ({
 
             <input
               type="tel"
-              placeholder="FREQUENCY (OPTIONAL)"
+              placeholder=" CONTACT NUMBER "
               className="w-full bg-transparent border-b border-white/10 py-4 text-white text-xs tracking-widest placeholder:text-white/20 focus:outline-none focus:border-white"
               value={formData.phone}
               onChange={(e) =>
