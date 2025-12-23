@@ -11,8 +11,7 @@ const charToBinary = (c: string) =>
 const wordToBinary = (word: string) =>
   word.split("").map(charToBinary).join(" ");
 
-/* ===================== WORD-GLITCH LINE ===================== */
-/* Used for hero + belief text. Same system everywhere. */
+/* ===================== GLITCH LINE (WIDTH-STABLE) ===================== */
 
 const GlitchLine: React.FC<{
   text: string;
@@ -28,36 +27,46 @@ const GlitchLine: React.FC<{
       setActiveIndex(idx);
       setTimeout(() => setActiveIndex(null), 600);
     }, 3000);
-
     return () => clearInterval(interval);
   }, [words.length]);
 
   return (
     <div
-      className={`flex flex-wrap justify-center ${size} ${tracking}`}
-      style={{ lineHeight: "1.15" }} // LOCKED
+      className={`flex justify-center flex-wrap ${size} ${tracking}`}
+      style={{ lineHeight: "1.15" }}
     >
-      {words.map((word, i) => (
-        <span
-          key={i}
-          className="relative mx-[0.35em] inline-flex items-center"
-          style={{ height: "1em" }} // RESERVE SPACE → NO JUMP
-        >
-          {activeIndex === i ? (
-            <motion.span
-              initial={{ opacity: 0 }}
-              animate={{ opacity: [0, 1, 0.5] }}
-              transition={{ duration: 0.5 }}
-              className="text-white/60 tracking-[0.08em]"
-              style={{ transform: "scale(0.75)" }} // SCALE, NOT FONT SIZE
-            >
-              {wordToBinary(word)}
-            </motion.span>
-          ) : (
-            <span>{word}</span>
-          )}
-        </span>
-      ))}
+      {words.map((word, i) => {
+        // Reserve enough width so binary never expands line
+        const reservedWidthCh = Math.max(word.length * 8, word.length * 1.2);
+
+        return (
+          <span
+            key={i}
+            className="relative mx-[0.35em] inline-flex items-center justify-center"
+            style={{
+              height: "1em",
+              minWidth: `${reservedWidthCh}ch`,
+            }}
+          >
+            {activeIndex === i ? (
+              <motion.span
+                initial={{ opacity: 0 }}
+                animate={{ opacity: [0, 1, 0.5] }}
+                transition={{ duration: 0.5 }}
+                className="text-white/60 tracking-[0.08em]"
+                style={{
+                  transform: "scale(0.7)",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {wordToBinary(word)}
+              </motion.span>
+            ) : (
+              <span style={{ whiteSpace: "nowrap" }}>{word}</span>
+            )}
+          </span>
+        );
+      })}
     </div>
   );
 };
@@ -116,7 +125,6 @@ const MainContent: React.FC<{ setGlobalState?: (s: PageState) => void }> = ({
       {/* ===================== HERO ===================== */}
       <section className="h-screen snap-start flex items-center justify-center text-center px-4">
         <div className="space-y-6 max-w-[95vw]">
-          {/* MATCHED TYPOGRAPHY SYSTEM */}
           <GlitchLine
             text="BUILDING MAGIC WITH"
             size="text-[clamp(1.1rem,4.5vw,2.8rem)]"
