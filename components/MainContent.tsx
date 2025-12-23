@@ -13,10 +13,11 @@ const wordToBinary = (word: string) =>
 
 /* ===================== GLITCH WORD LINE ===================== */
 /*
-  KEY FIX:
-  - word container reserves width
-  - binary uses SAME font-size & line-height
-  - glitch is visual only (opacity + text-shadow)
+  RULES:
+  - Original word always stays (defines layout)
+  - Binary is absolute overlay
+  - Binary is scaled down
+  - No layout shift, ever
 */
 
 const GlitchLine: React.FC<{
@@ -31,7 +32,7 @@ const GlitchLine: React.FC<{
     const interval = setInterval(() => {
       const idx = Math.floor(Math.random() * words.length);
       setActiveIndex(idx);
-      setTimeout(() => setActiveIndex(null), 550);
+      setTimeout(() => setActiveIndex(null), 600);
     }, 3000);
 
     return () => clearInterval(interval);
@@ -51,16 +52,10 @@ const GlitchLine: React.FC<{
             height: "1em",
           }}
         >
-          {/* NORMAL WORD */}
-          <span
-            className={`transition-opacity duration-150 ${
-              activeIndex === i ? "opacity-0" : "opacity-100"
-            }`}
-          >
-            {word}
-          </span>
+          {/* ORIGINAL WORD (ALWAYS DEFINES LAYOUT) */}
+          <span className="opacity-100">{word}</span>
 
-          {/* BINARY (SAME SIZE, GLITCH EFFECT) */}
+          {/* BINARY OVERLAY (SMALL, GLITCHY, NO LAYOUT EFFECT) */}
           {activeIndex === i && (
             <motion.span
               initial={{ opacity: 0 }}
@@ -74,7 +69,16 @@ const GlitchLine: React.FC<{
                 ],
               }}
               transition={{ duration: 0.5 }}
-              className="absolute inset-0 flex items-center justify-center text-white"
+              className="
+                absolute inset-0
+                flex items-center justify-center
+                text-white
+                tracking-[0.08em]
+                pointer-events-none
+              "
+              style={{
+                transform: "scale(0.65)", // 👈 SMALL ENOUGH TO FIT
+              }}
             >
               {wordToBinary(word)}
             </motion.span>
@@ -122,31 +126,28 @@ const MainContent: React.FC<{ setGlobalState?: (s: PageState) => void }> = ({
   return (
     <div className="relative h-screen w-full snap-y snap-mandatory overflow-y-scroll overflow-x-hidden text-white">
 
-      {/* ===================== FIXED LOGO ===================== */}
+      {/* FIXED LOGO */}
       <header className="fixed top-6 left-0 w-full flex justify-center z-30 pointer-events-none">
         <h1
           className="
             uppercase font-light shimmer
             text-[clamp(1rem,3.5vw,1.8rem)]
             tracking-[0.35em]
-            text-white
           "
         >
           MADEFOX
         </h1>
       </header>
 
-      {/* ===================== HERO ===================== */}
+      {/* HERO */}
       <section className="h-screen snap-start flex items-center justify-center text-center px-4">
         <div className="space-y-6 max-w-[95vw]">
-          {/* FIRST VIEWPORT — SAME SYSTEM AS SECOND */}
           <GlitchLine
             text="BUILDING MAGIC WITH"
             size="text-[clamp(1.1rem,4.5vw,2.8rem)]"
             tracking="tracking-[0.25em] md:tracking-[0.3em]"
           />
 
-          {/* 0 & 1 — AMPERSAND NORMAL */}
           <div className="flex items-center justify-center gap-6 md:gap-10 tracking-[0.3em] text-[clamp(1.4rem,6vw,3.2rem)] leading-none">
             <motion.span animate={{ opacity: [0, 1] }}>{left}</motion.span>
             <span>&</span>
@@ -155,7 +156,7 @@ const MainContent: React.FC<{ setGlobalState?: (s: PageState) => void }> = ({
         </div>
       </section>
 
-      {/* ===================== BELIEF ===================== */}
+      {/* BELIEF */}
       <section className="h-screen snap-start flex items-center justify-center text-center px-4 relative">
         <div className="space-y-4 max-w-[95vw]">
           <GlitchLine
@@ -184,13 +185,11 @@ const MainContent: React.FC<{ setGlobalState?: (s: PageState) => void }> = ({
           </div>
         </div>
 
-        {/* FOOTER */}
         <footer className="absolute bottom-6 text-[10px] tracking-[0.3em] uppercase opacity-50">
           <a href="mailto:hello@madefox.com">HELLO@MADEFOX.COM</a>
         </footer>
       </section>
 
-      {/* ===================== CONTACT ===================== */}
       <AnimatePresence>
         {showForm && <ContactForm onClose={() => setShowForm(false)} />}
       </AnimatePresence>
